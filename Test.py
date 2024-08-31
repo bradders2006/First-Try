@@ -48,13 +48,19 @@ def password_check(username, passwd):
          
     elif not any(char in SpecialSym for char in passwd):
         val = "Password should have at least one special symbol"
-    #else:
-    #   create(username, passwd)
 
     return val
     
 
 signup_form = Tk() # create main window
+
+# Getting screen width and height of display
+width= signup_form.winfo_screenwidth() 
+height= signup_form.winfo_screenheight()
+
+# Setting tkinter window size
+signup_form.geometry("%dx%d" % (width, height))
+signup_form.title("Signup Form")
 
 # Create Username and Password input boxes
 Label(signup_form, text="Username").grid(row=0)
