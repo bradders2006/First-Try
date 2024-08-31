@@ -1,21 +1,36 @@
 # Import modules
 from tkinter import *
+import sqlite3
 
 class User:
     def __init__(self, username, password):
         self.username = username
         self.password = password
 
-def create(username, password): # initialise User object
-    global signup_form
-    user_details = User(username, password)
-    print(user_details.username)
-    print(user_details.password)
+    def add_user(self): # add user to database
+        connection = sqlite3.connect("Users.db") # create or connect to database
+        cursor = connection.cursor() # create a cursor object to interact with the database
 
-    # Clear window and display signup success message
-    for widgets in signup_form.winfo_children():
-      widgets.destroy()
-      Label(signup_form, text="Sign Up Successful").grid(row=0)
+        # Insert username and hashed password into database
+        parameters = (self.username, str(hash(self.password)))
+        try:
+            cursor.execute('''INSERT INTO Users (Username, Password) VALUES (?, ?)''', parameters)        
+            connection.commit()
+
+            # Clear window and display signup success message
+            for widgets in signup_form.winfo_children():
+                widgets.destroy()
+                Label(signup_form, text="Sign Up Successful").grid(row=0)
+
+        except sqlite3.IntegrityError as e: # error handling if user tries to signup with an existing username
+            Label(signup_form, text="Error: Username already exists.", fg="red").grid(row=3)
+
+        # Close the connection
+        connection.close()
+
+def create(username, password): # initialise User object
+    user_details = User(username, password)
+    user_details.add_user()
 
 def on_click():
     # Retrieve the values from the entry fields and call create
