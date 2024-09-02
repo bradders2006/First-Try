@@ -23,9 +23,9 @@ class User:
 
         except sqlite3.IntegrityError as e:
             # Clear any existing messages
-            for widget in form_frame.grid_slaves(row=3, column=0):
+            for widget in form_frame.grid_slaves(row=4, column=0):
                 widget.destroy()
-            Label(form_frame, text="Error: Username already exists.", fg="red").grid(row=3, column=0, columnspan=2)
+            Label(form_frame, text="Error: Username already exists.", fg="red").grid(row=4, column=0, columnspan=2)
 
         connection.close()
 
@@ -39,14 +39,14 @@ def on_click():
         password_result = password_check(username, password)
 
     # Clear any existing messages
-    for widget in form_frame.grid_slaves(row=3, column=0):
+    for widget in form_frame.grid_slaves(row=4, column=0):
         widget.destroy()
         
     if password_result == True:
         user_details = User(username, password)
         user_details.add_user()
     else:
-        Label(form_frame, text=password_result, fg="red").grid(row=3, column=0, columnspan=2)
+        Label(form_frame, text=password_result, fg="red").grid(row=4, column=0, columnspan=2)
 
 def password_check(username, passwd):
     SpecialSym = ["$", "@", "#", "%", "&", "*", "!", "."]
