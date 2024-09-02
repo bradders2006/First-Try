@@ -1,4 +1,3 @@
-# Import modules
 from tkinter import *
 import sqlite3
 
@@ -7,56 +6,46 @@ class User:
         self.username = username
         self.password = password
 
-    def add_user(self): # add user to database
-        connection = sqlite3.connect("Users.db") # create or connect to database
-        cursor = connection.cursor() # create a cursor object to interact with the database
+    def add_user(self):
+        connection = sqlite3.connect("Users.db")
+        cursor = connection.cursor()
 
-        # Insert username and hashed password into database
-        parameters = (self.username, str(hash(self.password)))
+        parameters = (self.username, str(hash(self.password)), self.password)
         try:
-            cursor.execute('''INSERT INTO Users (Username, Password) VALUES (?, ?)''', parameters)        
+            cursor.execute('''INSERT INTO Users (Username, Password, Password2) VALUES (?, ?, ?)''', parameters)        
             connection.commit()
 
             # Clear window and display signup success message
             for widgets in gameWindow.winfo_children():
                 widgets.destroy()
-                Label(gameWindow, text="Sign Up Successful").grid(row=0)
-                gameWindow.title("Main Game")
+            Label(gameWindow, text="Sign Up Successful").pack(pady=20)
+            gameWindow.title("Main Game")
 
-        except sqlite3.IntegrityError as e: # error handling if user tries to signup with an existing username
+        except sqlite3.IntegrityError as e:
             # Clear any existing messages
-            for widget in gameWindow.grid_slaves(row=3, column=0):
+            for widget in form_frame.grid_slaves(row=3, column=0):
                 widget.destroy()
-            Label(gameWindow, text="Error: Username already exists.", fg="red").grid(row=3)
+            Label(form_frame, text="Error: Username already exists.", fg="red").grid(row=3, column=0, columnspan=2)
 
-        # Close the connection
         connection.close()
 
-#def create(username, password): # initialise User object
- #   user_details = User(username, password)
-  #  user_details.add_user()
-
 def on_click():
-    # Retrieve the values from the entry fields and call create
     username = e1.get()
     password = e2.get()
     password_result = password_check(username, password)
 
     # Clear any existing messages
-    for widget in gameWindow.grid_slaves(row=3, column=0):
+    for widget in form_frame.grid_slaves(row=3, column=0):
         widget.destroy()
         
     if password_result == True:
         user_details = User(username, password)
         user_details.add_user()
     else:
-        Label(gameWindow, text=password_result, fg="red").grid(row=3)
-        
+        Label(form_frame, text=password_result, fg="red").grid(row=3, column=0, columnspan=2)
 
-# Function to validate the password
 def password_check(username, passwd):
-     
-    SpecialSym =["$", "@", "#", "%", "&", "*", "!", "."]
+    SpecialSym = ["$", "@", "#", "%", "&", "*", "!", "."]
     val = True
      
     if len(passwd) < 6:
@@ -75,34 +64,30 @@ def password_check(username, passwd):
         val = "Password should have at least one special symbol"
 
     return val
-    
 
-gameWindow = Tk() # create main window
+gameWindow = Tk()
 
-# Getting screen width and height of display
-width= gameWindow.winfo_screenwidth() 
-height= gameWindow.winfo_screenheight()
+width = gameWindow.winfo_screenwidth()
+height = gameWindow.winfo_screenheight()
 
-# Setting tkinter window size
 gameWindow.geometry("%dx%d" % (width, height))
-
-
-
-
-# Signup form window widgets
 gameWindow.title("Signup Form")
 
-# Create Username and Password input boxes
-Label(gameWindow, text="Username").grid(row=0)
-Label(gameWindow, text="Password").grid(row=1)
+# Create a Frame to hold the form widgets
+form_frame = Frame(gameWindow)
+form_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-e1 = Entry(gameWindow)
-e2 = Entry(gameWindow, show="*")
-e1.grid(row=0, column=1)
-e2.grid(row=1, column=1)
+# Create Username and Password input boxes
+Label(form_frame, text="Username").grid(row=0, column=0, pady=5)
+Label(form_frame, text="Password").grid(row=1, column=0, pady=5)
+
+e1 = Entry(form_frame)
+e2 = Entry(form_frame, show="*")
+e1.grid(row=0, column=1, pady=5)
+e2.grid(row=1, column=1, pady=5)
 
 # Create button
-button = Button(gameWindow, text="Sign Up", command=on_click)
-button.grid(row=2, column=0, columnspan=2) # position button
+button = Button(form_frame, text="Sign Up", command=on_click)
+button.grid(row=2, column=0, columnspan=2, pady=10)
 
 mainloop()
