@@ -23,6 +23,9 @@ class User:
                 Label(signup_form, text="Sign Up Successful").grid(row=0)
 
         except sqlite3.IntegrityError as e: # error handling if user tries to signup with an existing username
+            # Clear any existing messages
+            for widget in signup_form.grid_slaves(row=3, column=0):
+                widget.destroy()
             Label(signup_form, text="Error: Username already exists.", fg="red").grid(row=3)
 
         # Close the connection
@@ -37,8 +40,13 @@ def on_click():
     username = e1.get()
     password = e2.get()
     password_result = password_check(username, password)
+
+    # Clear any existing messages
+    for widget in signup_form.grid_slaves(row=3, column=0):
+        widget.destroy()
+        
     if password_result == True:
-        create(username, password)
+        create(username, password) # take user to 
     else:
         Label(signup_form, text=password_result, fg="red").grid(row=3)
         
