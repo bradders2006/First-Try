@@ -32,7 +32,11 @@ class User:
 def on_click():
     username = e1.get()
     password = e2.get()
-    password_result = password_check(username, password)
+    passwordAgain = e3.get()
+    if password != passwordAgain:
+        password_result = "Passwords do not match, please try again"
+    else:
+        password_result = password_check(username, password)
 
     # Clear any existing messages
     for widget in form_frame.grid_slaves(row=3, column=0):
@@ -78,16 +82,19 @@ form_frame = Frame(gameWindow)
 form_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
 # Create Username and Password input boxes
-Label(form_frame, text="Username").grid(row=0, column=0, pady=5)
-Label(form_frame, text="Password").grid(row=1, column=0, pady=5)
+Label(form_frame, text="Enter Username").grid(row=0, column=0, pady=5)
+Label(form_frame, text="Enter Password").grid(row=1, column=0, pady=5)
+Label(form_frame, text="Enter Password Again").grid(row=2, column=0, pady=5)
 
 e1 = Entry(form_frame)
 e2 = Entry(form_frame, show="*")
+e3 = Entry(form_frame, show="*")
 e1.grid(row=0, column=1, pady=5)
 e2.grid(row=1, column=1, pady=5)
+e3.grid(row=2, column=1, pady=5)
 
 # Create button
 button = Button(form_frame, text="Sign Up", command=on_click)
-button.grid(row=2, column=0, columnspan=2, pady=10)
+button.grid(row=3, column=0, columnspan=2, pady=10)
 
 mainloop()
