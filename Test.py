@@ -21,10 +21,12 @@ class User:
             connection.commit()
 
             # Clear window and display signup success message
-            for widgets in gameWindow.winfo_children():
+            for widgets in form_frame.winfo_children():
                 widgets.destroy()
-            Label(gameWindow, text="Sign Up Successful").pack(pady=20)
+            #Label(gameWindow, text="Sign Up Successful").pack(pady=20)
             gameWindow.title("Main Game")
+            playGame = Button(form_frame, text="Play Game", command=lambda: print("Starting game")).grid(row=0, column=0, columnspan=2, pady=10)
+            viewLeaderboard = Button(form_frame, text="View Leaderboard", command = lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
 
         except sqlite3.IntegrityError as e:
             # Clear any existing messages
@@ -141,10 +143,12 @@ def commence_signin():
     checkDetails = user_details.check_user()
     if checkDetails == True:
         # Clear window and display signup success message
-        for widgets in gameWindow.winfo_children():
+        for widgets in form_frame.winfo_children():
             widgets.destroy()
-        Label(gameWindow, text="Sign Up Successful").pack(pady=20)
+        #Label(gameWindow, text="Sign In Successful").pack(pady=20)
         gameWindow.title("Main Game")
+        playGame = Button(form_frame, text="Play Game", command=lambda: print("Starting game")).grid(row=0, column=0, columnspan=2, pady=10)
+        viewLeaderboard = Button(form_frame, text="View Leaderboard", command=lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
     else:
         errorMessage = Label(form_frame, text=checkDetails, fg="red").grid(row=4, column=0, columnspan=2)
     
