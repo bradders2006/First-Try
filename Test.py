@@ -1,3 +1,4 @@
+import hashlib
 from tkinter import *
 import sqlite3
 
@@ -6,11 +7,15 @@ class User:
         self.username = username
         self.password = password
 
+    def hash_password(self, password):
+        return hashlib.sha256(password.encode()).hexdigest()
+
     def add_user(self):
         connection = sqlite3.connect("Users.db")
         cursor = connection.cursor()
 
-        parameters = (self.username, str(hash(self.password)), self.password)
+        hashed_password = self.hash_password(self.password)
+        parameters = (self.username, hashed_password, self.password)
         try:
             cursor.execute('''INSERT INTO Users (Username, Password, Password2) VALUES (?, ?, ?)''', parameters)        
             connection.commit()
@@ -28,6 +33,36 @@ class User:
             Label(form_frame, text="Error: Username already exists.", fg="red").grid(row=4, column=0, columnspan=2)
 
         connection.close()
+
+    def check_user(self):
+        connection = sqlite3.connect("Users.db")
+        cursor = connection.cursor()
+        parameters = (self.username,)
+        result = ""
+
+        for widget in form_frame.grid_slaves(row=4, column=0):
+                widget.destroy()
+
+        try:
+            cursor.execute(''' SELECT Username, Password FROM Users WHERE Username = ?''', parameters)
+            userExists = cursor.fetchone()
+
+            if userExists:
+                print(f"User found: {userExists[0]}")
+                stored_hashed_password = userExists[1]
+                provided_hashed_password = self.hash_password(self.password)
+                print(stored_hashed_password + " " + provided_hashed_password)
+                if stored_hashed_password == provided_hashed_password:
+                    result = True
+                else:
+                    result = "Incorrect Password, please try again"
+            else:
+                result = "This username does not exist"
+            
+        finally:
+            connection.close()
+
+        return result
 
 def on_click():
     username = e1.get()
@@ -94,9 +129,25 @@ def load_signin():
     enterPasswordAgain.destroy()
     button.destroy()
     signinButton["text"] = "Sign In"
-    signinButton.config(command=lambda: print("Hello World"))
+    signinButton.config(command=lambda: commence_signin())
     e3.destroy()
+    e1.delete(0, END)
+    e2.delete(0, END)
 
+def commence_signin():
+    username = e1.get()
+    password = e2.get()
+    user_details = User(username, password)
+    checkDetails = user_details.check_user()
+    if checkDetails == True:
+        # Clear window and display signup success message
+        for widgets in gameWindow.winfo_children():
+            widgets.destroy()
+        Label(gameWindow, text="Sign Up Successful").pack(pady=20)
+        gameWindow.title("Main Game")
+    else:
+        errorMessage = Label(form_frame, text=checkDetails, fg="red").grid(row=4, column=0, columnspan=2)
+    
                 
 signinButton = Button(form_frame, text="Already have an account? Sign In", command=load_signin)
 signinButton.grid(row=5, column=0, columnspan=2, pady=5)
