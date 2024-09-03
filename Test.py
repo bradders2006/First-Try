@@ -82,9 +82,29 @@ form_frame = Frame(gameWindow)
 form_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
 # Create Username and Password input boxes
-Label(form_frame, text="Enter Username").grid(row=0, column=0, pady=5)
-Label(form_frame, text="Enter Password").grid(row=1, column=0, pady=5)
-Label(form_frame, text="Enter Password Again").grid(row=2, column=0, pady=5)
+enterUsername = Label(form_frame, text="Enter Username").grid(row=0, column=0, pady=5)
+enterPassword = Label(form_frame, text="Enter Password").grid(row=1, column=0, pady=5)
+enterPasswordAgain = Label(form_frame, text="Enter Password Again").grid(row=2, column=0, pady=5)
+
+
+def load_signin():
+    global form_frame
+    for widgets in form_frame.winfo_children():
+                widgets.destroy()
+                
+    enterUsername = Label(form_frame, text="Enter Username").grid(row=0, column=0, pady=5)
+    enterPassword = Label(form_frame, text="Enter Password").grid(row=1, column=0, pady=5)
+    e1 = Entry(form_frame)
+    e2 = Entry(form_frame, show="*")
+    e1.grid(row=0, column=1, pady=5)
+    e2.grid(row=1, column=1, pady=5)
+    button = Button(form_frame, text="Sign In")
+    button.grid(row=3, column=0, columnspan=2, pady=10)
+
+                
+signinButton = Button(form_frame, text="Already have an account? Sign In", command=load_signin)
+signinButton.grid(row=5, column=0, columnspan=2, pady=5)
+
 
 e1 = Entry(form_frame)
 e2 = Entry(form_frame, show="*")
