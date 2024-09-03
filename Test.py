@@ -1,6 +1,7 @@
 import hashlib
 from tkinter import *
 import sqlite3
+import random
 
 class User:
     def __init__(self, username, password):
@@ -157,30 +158,50 @@ e3.grid(row=2, column=1, pady=5)
 button = Button(form_frame, text="Sign Up", command=on_click)
 button.grid(row=3, column=0, columnspan=2, pady=10)
 
-class Answer:
-    def __init__(self, guess):
-        self.guess = guess
-
-    def checkResult(self):
-        if self.guess == "shush":
-            display_message("Correct", "green")
-        else:
-            display_message("Incorrect", "red")
+score = 0
 
 def play():
+    number = random.randint(1,2)
+    
+    # Display song initials and song artist
+    connection = sqlite3.connect("Users.db")
+    cursor = connection.cursor()
+        
+    try:
+        cursor.execute('''SELECT Songname, Artist FROM Songs ORDER BY RANDOM() LIMIT 1''')
+        songnameAndArtist = cursor.fetchone()
+        answer = songnameAndArtist[0]
+        initials = ""
+        words = answer.split()
+        for i in words:
+            initials = initials + i[0] + " "
+
+    finally:
+        connection.close()
+
+
+    
     clear_frame()
 
-    Label(form_frame, text="Score: ").grid(row=0, column=0, columnspan=2)
-    Label(form_frame, text="Song initials go here").grid(row=1, column=0, columnspan=2)
+    Label(form_frame, text=("Score:", score)).grid(row=0, column=0, columnspan=2)
+    Label(form_frame, text=(initials, "by", songnameAndArtist[1])).grid(row=1, column=0, columnspan=2)
 
     guess_entry = Entry(form_frame)
     guess_entry.grid(row=2, column=0, pady=5, columnspan=2)
-    
-    submit_guess = Button(form_frame, text="Enter Answer", command=lambda: checkAnswer(guess_entry.get()))
+
+    submit_guess = Button(form_frame, text="Enter Answer", command=lambda: checkAnswer(guess_entry.get(), answer))
     submit_guess.grid(row=3, column=0, columnspan=2, pady=5)
 
-def checkAnswer(guess):
-    userAnswer = Answer(guess)
-    userAnswer.checkResult()
+def checkAnswer(guess, answer):
+    global score
+    if guess.lower() == answer.lower():
+        display_message("Correct", "green")
+        score+=1
+        play()
+    else:
+        clear_frame()
+        Label(form_frame, text=("Final Score:", score)).grid(row=0, column=0, columnspan=2)
+        playAgain = Button(form_frame, text="Play Again?", command=lambda: play()).grid(row=1, column=0, columnspan=2)
+    
 
 mainloop()
