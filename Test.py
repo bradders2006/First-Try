@@ -15,9 +15,9 @@ class User:
         cursor = connection.cursor()
 
         hashed_password = self.hash_password(self.password)
-        parameters = (self.username, hashed_password, self.password)
+        parameters = (self.username, hashed_password)
         try:
-            cursor.execute('''INSERT INTO Users (Username, Password, Password2) VALUES (?, ?, ?)''', parameters)        
+            cursor.execute('''INSERT INTO Users (Username, Password) VALUES (?, ?)''', parameters)        
             connection.commit()
 
             # Clear window and display signup success message
