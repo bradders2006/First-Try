@@ -23,7 +23,6 @@ class User:
             # Clear window and display signup success message
             for widgets in form_frame.winfo_children():
                 widgets.destroy()
-            #Label(gameWindow, text="Sign Up Successful").pack(pady=20)
             gameWindow.title("Main Game")
             playGame = Button(form_frame, text="Play Game", command=lambda: print("Starting game")).grid(row=0, column=0, columnspan=2, pady=10)
             viewLeaderboard = Button(form_frame, text="View Leaderboard", command = lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
@@ -50,10 +49,8 @@ class User:
             userExists = cursor.fetchone()
 
             if userExists:
-                print(f"User found: {userExists[0]}")
                 stored_hashed_password = userExists[1]
                 provided_hashed_password = self.hash_password(self.password)
-                print(stored_hashed_password + " " + provided_hashed_password)
                 if stored_hashed_password == provided_hashed_password:
                     result = True
                 else:
@@ -145,9 +142,8 @@ def commence_signin():
         # Clear window and display signup success message
         for widgets in form_frame.winfo_children():
             widgets.destroy()
-        #Label(gameWindow, text="Sign In Successful").pack(pady=20)
         gameWindow.title("Main Game")
-        playGame = Button(form_frame, text="Play Game", command=lambda: print("Starting game")).grid(row=0, column=0, columnspan=2, pady=10)
+        playGame = Button(form_frame, text="Play Game", command=lambda: play()).grid(row=0, column=0, columnspan=2, pady=10)
         viewLeaderboard = Button(form_frame, text="View Leaderboard", command=lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
     else:
         errorMessage = Label(form_frame, text=checkDetails, fg="red").grid(row=4, column=0, columnspan=2)
@@ -168,4 +164,15 @@ e3.grid(row=2, column=1, pady=5)
 button = Button(form_frame, text="Sign Up", command=on_click)
 button.grid(row=3, column=0, columnspan=2, pady=10)
 
+
+# Main Game
+def play():
+    for widgets in form_frame.winfo_children():
+            widgets.destroy()
+
+    score = Label(form_frame, text="Score: ",).grid(row=0, column=0, columnspan=2)
+    song = Label(form_frame, text="Song initials go here").grid(row=1, column=0, columnspan=2)
+    enter_guess = Entry(form_frame).grid(row=2, column=0, pady=5, columnspan=2)
+    submit_guess =  Button(form_frame, text="Enter Answer", command=lambda: print("Guess entered")).grid(row=3, column=0, columnspan=2, pady=5)
+    
 mainloop()
