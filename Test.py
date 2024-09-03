@@ -75,7 +75,7 @@ width = gameWindow.winfo_screenwidth()
 height = gameWindow.winfo_screenheight()
 
 gameWindow.geometry("%dx%d" % (width, height))
-gameWindow.title("Signup Form")
+gameWindow.title("Sign Up")
 
 # Create a Frame to hold the form widgets
 form_frame = Frame(gameWindow)
@@ -84,22 +84,18 @@ form_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 # Create Username and Password input boxes
 enterUsername = Label(form_frame, text="Enter Username").grid(row=0, column=0, pady=5)
 enterPassword = Label(form_frame, text="Enter Password").grid(row=1, column=0, pady=5)
-enterPasswordAgain = Label(form_frame, text="Enter Password Again").grid(row=2, column=0, pady=5)
+enterPasswordAgain = Label(form_frame, text="Enter Password Again")
+enterPasswordAgain.grid(row=2, column=0, pady=5)
 
-
+# Update widgets to load sign in page
 def load_signin():
     global form_frame
-    for widgets in form_frame.winfo_children():
-                widgets.destroy()
-                
-    enterUsername = Label(form_frame, text="Enter Username").grid(row=0, column=0, pady=5)
-    enterPassword = Label(form_frame, text="Enter Password").grid(row=1, column=0, pady=5)
-    e1 = Entry(form_frame)
-    e2 = Entry(form_frame, show="*")
-    e1.grid(row=0, column=1, pady=5)
-    e2.grid(row=1, column=1, pady=5)
-    button = Button(form_frame, text="Sign In")
-    button.grid(row=3, column=0, columnspan=2, pady=10)
+    gameWindow.title("Sign In")
+    enterPasswordAgain.destroy()
+    button.destroy()
+    signinButton["text"] = "Sign In"
+    signinButton.config(command=lambda: print("Hello World"))
+    e3.destroy()
 
                 
 signinButton = Button(form_frame, text="Already have an account? Sign In", command=load_signin)
