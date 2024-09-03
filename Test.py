@@ -14,24 +14,22 @@ class User:
         connection = sqlite3.connect("Users.db")
         cursor = connection.cursor()
 
+        # Create Users table if it doesn't exist
+        cursor.execute('''CREATE TABLE IF NOT EXISTS Users (Username TEXT UNIQUE, Password TEXT)''')
+        
         hashed_password = self.hash_password(self.password)
         parameters = (self.username, hashed_password)
         try:
-            cursor.execute('''INSERT INTO Users (Username, Password) VALUES (?, ?)''', parameters)        
+            cursor.execute('''INSERT INTO Users (Username, Password) VALUES (?, ?)''', parameters)
             connection.commit()
 
-            # Clear window and display signup success message
-            for widgets in form_frame.winfo_children():
-                widgets.destroy()
+            clear_frame()
             gameWindow.title("Main Game")
-            playGame = Button(form_frame, text="Play Game", command=lambda: print("Starting game")).grid(row=0, column=0, columnspan=2, pady=10)
-            viewLeaderboard = Button(form_frame, text="View Leaderboard", command = lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
+            Button(form_frame, text="Play Game", command=play).grid(row=0, column=0, columnspan=2, pady=10)
+            Button(form_frame, text="View Leaderboard", command=lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
 
-        except sqlite3.IntegrityError as e:
-            # Clear any existing messages
-            for widget in form_frame.grid_slaves(row=4, column=0):
-                widget.destroy()
-            Label(form_frame, text="Error: Username already exists.", fg="red").grid(row=4, column=0, columnspan=2)
+        except sqlite3.IntegrityError:
+            display_message("Error: Username already exists.", "red")
 
         connection.close()
 
@@ -41,11 +39,10 @@ class User:
         parameters = (self.username,)
         result = ""
 
-        for widget in form_frame.grid_slaves(row=4, column=0):
-                widget.destroy()
+        clear_row(row=4)
 
         try:
-            cursor.execute(''' SELECT Username, Password FROM Users WHERE Username = ?''', parameters)
+            cursor.execute('''SELECT Username, Password FROM Users WHERE Username = ?''', parameters)
             userExists = cursor.fetchone()
 
             if userExists:
@@ -57,11 +54,23 @@ class User:
                     result = "Incorrect Password, please try again"
             else:
                 result = "This username does not exist"
-            
+
         finally:
             connection.close()
 
         return result
+
+def clear_frame():
+    for widget in form_frame.winfo_children():
+        widget.destroy()
+
+def clear_row(row):
+    for widget in form_frame.grid_slaves(row=row):
+        widget.destroy()
+
+def display_message(message, color):
+    clear_row(4)
+    Label(form_frame, text=message, fg=color).grid(row=4, column=0, columnspan=2)
 
 def on_click():
     username = e1.get()
@@ -72,32 +81,26 @@ def on_click():
     else:
         password_result = password_check(username, password)
 
-    # Clear any existing messages
-    for widget in form_frame.grid_slaves(row=4, column=0):
-        widget.destroy()
-        
+    clear_row(4)
+
     if password_result == True:
         user_details = User(username, password)
         user_details.add_user()
     else:
-        Label(form_frame, text=password_result, fg="red").grid(row=4, column=0, columnspan=2)
+        display_message(password_result, "red")
 
 def password_check(username, passwd):
     SpecialSym = ["$", "@", "#", "%", "&", "*", "!", "."]
     val = True
-     
+
     if len(passwd) < 6:
         val = "Password should be at least 6 characters long"
-         
     elif not any(char.isdigit() for char in passwd):
         val = "Password should have at least one number"
-         
     elif not any(char.isupper() for char in passwd):
         val = "Password should have at least one uppercase letter"
-         
     elif not any(char.islower() for char in passwd):
         val = "Password should have at least one lowercase letter"
-         
     elif not any(char in SpecialSym for char in passwd):
         val = "Password should have at least one special symbol"
 
@@ -111,24 +114,19 @@ height = gameWindow.winfo_screenheight()
 gameWindow.geometry("%dx%d" % (width, height))
 gameWindow.title("Sign Up")
 
-# Create a Frame to hold the form widgets
 form_frame = Frame(gameWindow)
 form_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-# Create Username and Password input boxes
-enterUsername = Label(form_frame, text="Enter Username").grid(row=0, column=0, pady=5)
-enterPassword = Label(form_frame, text="Enter Password").grid(row=1, column=0, pady=5)
+Label(form_frame, text="Enter Username").grid(row=0, column=0, pady=5)
+Label(form_frame, text="Enter Password").grid(row=1, column=0, pady=5)
 enterPasswordAgain = Label(form_frame, text="Enter Password Again")
 enterPasswordAgain.grid(row=2, column=0, pady=5)
 
-# Update widgets to load sign in page
 def load_signin():
-    global form_frame
     gameWindow.title("Sign In")
     enterPasswordAgain.destroy()
     button.destroy()
-    signinButton["text"] = "Sign In"
-    signinButton.config(command=lambda: commence_signin())
+    signinButton.config(text="Sign In", command=commence_signin)
     e3.destroy()
     e1.delete(0, END)
     e2.delete(0, END)
@@ -139,19 +137,15 @@ def commence_signin():
     user_details = User(username, password)
     checkDetails = user_details.check_user()
     if checkDetails == True:
-        # Clear window and display signup success message
-        for widgets in form_frame.winfo_children():
-            widgets.destroy()
+        clear_frame()
         gameWindow.title("Main Game")
-        playGame = Button(form_frame, text="Play Game", command=lambda: play()).grid(row=0, column=0, columnspan=2, pady=10)
-        viewLeaderboard = Button(form_frame, text="View Leaderboard", command=lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
+        Button(form_frame, text="Play Game", command=play).grid(row=0, column=0, columnspan=2, pady=10)
+        Button(form_frame, text="View Leaderboard", command=lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
     else:
-        errorMessage = Label(form_frame, text=checkDetails, fg="red").grid(row=4, column=0, columnspan=2)
-    
-                
+        display_message(checkDetails, "red")
+
 signinButton = Button(form_frame, text="Already have an account? Sign In", command=load_signin)
 signinButton.grid(row=5, column=0, columnspan=2, pady=5)
-
 
 e1 = Entry(form_frame)
 e2 = Entry(form_frame, show="*")
@@ -160,19 +154,33 @@ e1.grid(row=0, column=1, pady=5)
 e2.grid(row=1, column=1, pady=5)
 e3.grid(row=2, column=1, pady=5)
 
-# Create button
 button = Button(form_frame, text="Sign Up", command=on_click)
 button.grid(row=3, column=0, columnspan=2, pady=10)
 
+class Answer:
+    def __init__(self, guess):
+        self.guess = guess
 
-# Main Game
+    def checkResult(self):
+        if self.guess == "shush":
+            display_message("Correct", "green")
+        else:
+            display_message("Incorrect", "red")
+
 def play():
-    for widgets in form_frame.winfo_children():
-            widgets.destroy()
+    clear_frame()
 
-    score = Label(form_frame, text="Score: ",).grid(row=0, column=0, columnspan=2)
-    song = Label(form_frame, text="Song initials go here").grid(row=1, column=0, columnspan=2)
-    enter_guess = Entry(form_frame).grid(row=2, column=0, pady=5, columnspan=2)
-    submit_guess =  Button(form_frame, text="Enter Answer", command=lambda: print("Guess entered")).grid(row=3, column=0, columnspan=2, pady=5)
+    Label(form_frame, text="Score: ").grid(row=0, column=0, columnspan=2)
+    Label(form_frame, text="Song initials go here").grid(row=1, column=0, columnspan=2)
+
+    guess_entry = Entry(form_frame)
+    guess_entry.grid(row=2, column=0, pady=5, columnspan=2)
     
+    submit_guess = Button(form_frame, text="Enter Answer", command=lambda: checkAnswer(guess_entry.get()))
+    submit_guess.grid(row=3, column=0, columnspan=2, pady=5)
+
+def checkAnswer(guess):
+    userAnswer = Answer(guess)
+    userAnswer.checkResult()
+
 mainloop()
