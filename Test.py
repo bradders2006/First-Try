@@ -74,6 +74,7 @@ def display_message(message, color):
     Label(form_frame, text=message, fg=color).grid(row=4, column=0, columnspan=2)
 
 def on_click():
+    global user_details
     username = e1.get()
     password = e2.get()
     passwordAgain = e3.get()
@@ -133,6 +134,7 @@ def load_signin():
     e2.delete(0, END)
 
 def commence_signin():
+    global user_details
     username = e1.get()
     password = e2.get()
     user_details = User(username, password)
@@ -183,8 +185,8 @@ def play():
     
     clear_frame()
 
-    Label(form_frame, text=("Score:", score)).grid(row=0, column=0, columnspan=2)
-    Label(form_frame, text=(initials, "by", songnameAndArtist[1])).grid(row=1, column=0, columnspan=2)
+    Label(form_frame, text=f"Score: {score}").grid(row=0, column=0, columnspan=2)
+    Label(form_frame, text=f"{initials} by {songnameAndArtist[1]}").grid(row=1, column=0, columnspan=2)
 
     guess_entry = Entry(form_frame)
     guess_entry.grid(row=2, column=0, pady=5, columnspan=2)
@@ -193,15 +195,32 @@ def play():
     submit_guess.grid(row=3, column=0, columnspan=2, pady=5)
 
 def checkAnswer(guess, answer):
-    global score
+    global score, user_details
+    global user_details
     if guess.lower() == answer.lower():
         display_message("Correct", "green")
         score+=1
         play()
     else:
         clear_frame()
-        Label(form_frame, text=("Final Score:", score)).grid(row=0, column=0, columnspan=2)
-        playAgain = Button(form_frame, text="Play Again?", command=lambda: play()).grid(row=1, column=0, columnspan=2)
-    
+        Label(form_frame, text=f"Final Score: {score}").grid(row=0, column=0, columnspan=2)
+
+        # Store score if higher than previous high score
+        connection = sqlite3.connect("Users.db")
+        cursor = connection.cursor()
+        cursor.execute('''SELECT HighScore FROM Users WHERE Username = ?''', (user_details.username,))
+        current_high_score = cursor.fetchone()[0]
+
+        # Update the high score if the current score is higher
+        if score > current_high_score:
+            cursor.execute('''UPDATE Users SET HighScore = ? WHERE Username = ?''', (score, user_details.username))
+            connection.commit()
+            Label(form_frame, text=f"Your High Score: {max(score, current_high_score)}").grid(row=1, column=0, columnspan=2)
+
+        connection.close()
+        
+        score = 0
+        playAgain = Button(form_frame, text="Play Again?", command=lambda: play()).grid(row=2, column=0, columnspan=2)
+
 
 mainloop()
