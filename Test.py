@@ -1,16 +1,19 @@
+# Import modules
 import hashlib
 from tkinter import *
 import sqlite3
 import random
 
+# User class
 class User:
     def __init__(self, username, password):
         self.username = username
         self.password = password
 
-    def hash_password(self, password):
+    def hash_password(self, password): #  method to hash password consistently
         return hashlib.sha256(password.encode()).hexdigest()
 
+    # Method to add user to database
     def add_user(self):
         connection = sqlite3.connect("Users.db")
         cursor = connection.cursor()
@@ -26,14 +29,15 @@ class User:
 
             clear_frame()
             gameWindow.title("Main Game")
-            Button(form_frame, text="Play Game", command=play).grid(row=0, column=0, columnspan=2, pady=10)
-            Button(form_frame, text="View Leaderboard", command=lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
+            Button(form_frame, text="Play Game", command=lambda: play).grid(row=0, column=0, columnspan=2, pady=10)
+            Button(form_frame, text="View Leaderboard", command=display_leaderboard).grid(row=1, column=0, columnspan=2, pady=10)
 
         except sqlite3.IntegrityError:
             display_message("Error: Username already exists.", "red")
 
         connection.close()
 
+    # Validate user signin data
     def check_user(self):
         connection = sqlite3.connect("Users.db")
         cursor = connection.cursor()
@@ -61,6 +65,7 @@ class User:
 
         return result
 
+# Empty frame window
 def clear_frame():
     for widget in form_frame.winfo_children():
         widget.destroy()
@@ -143,7 +148,7 @@ def commence_signin():
         clear_frame()
         gameWindow.title("Main Game")
         Button(form_frame, text="Play Game", command=play).grid(row=0, column=0, columnspan=2, pady=10)
-        Button(form_frame, text="View Leaderboard", command=lambda: print("Loading Leaderboard")).grid(row=1, column=0, columnspan=2, pady=10)
+        Button(form_frame, text="View Leaderboard", command=display_leaderboard).grid(row=1, column=0, columnspan=2, pady=10)
     else:
         display_message(checkDetails, "red")
 
@@ -204,6 +209,7 @@ def checkAnswer(guess, answer):
     else:
         clear_frame()
         Label(form_frame, text=f"Final Score: {score}").grid(row=0, column=0, columnspan=2)
+        Label(form_frame, text=f"Answer: {answer}").grid(row=2, column=0, columnspan=2)
 
         # Store score if higher than previous high score
         connection = sqlite3.connect("Users.db")
@@ -215,12 +221,37 @@ def checkAnswer(guess, answer):
         if score > current_high_score:
             cursor.execute('''UPDATE Users SET HighScore = ? WHERE Username = ?''', (score, user_details.username))
             connection.commit()
-            Label(form_frame, text=f"Your High Score: {max(score, current_high_score)}").grid(row=1, column=0, columnspan=2)
+        Label(form_frame, text=f"Your High Score: {max(score, current_high_score)}").grid(row=1, column=0, columnspan=2)
 
         connection.close()
         
         score = 0
-        playAgain = Button(form_frame, text="Play Again?", command=lambda: play()).grid(row=2, column=0, columnspan=2)
+        playAgain = Button(form_frame, text="Play Again?", command=lambda: play()).grid(row=3, column=0, columnspan=2)
+        Button(form_frame, text="Main Menu", command=mainwindow).grid(row=4, column=0, columnspan=2)
 
+def mainwindow():
+    clear_frame()
+    Button(form_frame, text="Play Game", command=play).grid(row=0, column=0, columnspan=2, pady=10)
+    Button(form_frame, text="View Leaderboard", command=display_leaderboard).grid(row=1, column=0, columnspan=2, pady=10)
+
+def display_leaderboard():
+    clear_frame()
+    connection = sqlite3.connect("Users.db")
+    cursor = connection.cursor()
+    
+    # Fetch top 10 users by high score
+    cursor.execute('''SELECT Username, HighScore FROM Users ORDER BY HighScore DESC LIMIT 10''')
+    topten = cursor.fetchall()
+
+    # Display the leaderboard in the GUI
+    Label(form_frame, text="Leaderboard", font=('Helvetica', 16, 'bold')).grid(row=0, column=0, columnspan=2, pady=10)
+    
+    # Display the results
+    for i, (username, highscore) in enumerate(topten, start=1):
+        Label(form_frame, text=f"{i}. {username} - {highscore}").grid(row=i, column=0, columnspan=2)
+    
+    connection.close()
+
+    Button(form_frame, text="Main Menu", command=mainwindow).grid(row=12, column=0, columnspan=2)
 
 mainloop()
